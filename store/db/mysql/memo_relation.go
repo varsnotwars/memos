@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/usememos/memos/plugin/filter"
@@ -33,6 +34,26 @@ func (d *DB) UpsertMemoRelation(ctx context.Context, create *store.MemoRelation)
 
 func (d *DB) ListMemoRelations(ctx context.Context, find *store.FindMemoRelation) ([]*store.MemoRelation, error) {
 	where, args := []string{"TRUE"}, []any{}
+
+	for _, filterStr := range find.Filters {
+		// Parse filter string and return the parsed expression.
+		// The filter string should be a CEL expression.
+		parsedExpr, err := filter.Parse(filterStr, filter.MemoRelationFilterCELAttributes...)
+		if err != nil {
+			return nil, err
+		}
+		convertCtx := filter.NewConvertContext()
+		// ConvertExprToSQL converts the parsed expression to a SQL condition string.
+		converter := filter.NewCommonSQLConverter(&filter.MySQLDialect{})
+		if err := converter.ConvertExprToSQL(convertCtx, parsedExpr.GetExpr()); err != nil {
+			return nil, err
+		}
+		condition := convertCtx.Buffer.String()
+		if condition != "" {
+			where = append(where, fmt.Sprintf("(%s)", condition))
+			args = append(args, convertCtx.Args...)
+		}
+	}
 	if find.MemoID != nil {
 		where, args = append(where, "`memo_id` = ?"), append(args, find.MemoID)
 	}
@@ -63,6 +84,7 @@ func (d *DB) ListMemoRelations(ctx context.Context, find *store.FindMemoRelation
 		}
 	}
 
+	log.Printf("SELECT `memo_id`, `related_memo_id`, `type` FROM `memo_relation` WHERE "+strings.Join(where, " AND "), args...)
 	rows, err := d.db.QueryContext(ctx, "SELECT `memo_id`, `related_memo_id`, `type` FROM `memo_relation` WHERE "+strings.Join(where, " AND "), args...)
 	if err != nil {
 		return nil, err

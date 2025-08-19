@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"strings"
 	"time"
@@ -204,6 +205,8 @@ func (s *APIV1Service) ListMemos(ctx context.Context, request *v1pb.ListMemosReq
 	attachmentMap := make(map[int32][]*store.Attachment)
 	memoIDs := make([]string, 0, len(memos))
 
+	relationsMap := make(map[int32][]*store.MemoRelation)
+
 	for _, m := range memos {
 		memoNames = append(memoNames, fmt.Sprintf("'%s%s'", MemoNamePrefix, m.UID))
 		memoIDs = append(memoIDs, fmt.Sprintf("'%d'", m.ID))
@@ -230,6 +233,21 @@ func (s *APIV1Service) ListMemos(ctx context.Context, request *v1pb.ListMemosReq
 	for _, attachment := range attachments {
 		attachmentMap[*attachment.MemoID] = append(attachmentMap[*attachment.MemoID], attachment)
 	}
+
+	// MEMO RELATIONS
+	relations, err := s.Store.ListMemoRelations(ctx, &store.FindMemoRelation{
+		Filters: []string{fmt.Sprintf("memo_id in [%[1]s] || memo_relation_id in [%[1]s]", strings.Join(memoIDs, ", "))},
+	})
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, status.Errorf(codes.Internal, "failed to list relations")
+	}
+	for _, relation := range relations {
+		relationsMap[relation.MemoID] = append(relationsMap[relation.MemoID], relation)
+		relationsMap[relation.RelatedMemoID] = append(relationsMap[relation.RelatedMemoID], relation)
+	}
+
+	log.Printf("relationMap: %v", relationsMap)
 
 	for _, memo := range memos {
 		memoName := fmt.Sprintf("%s%s", MemoNamePrefix, memo.UID)

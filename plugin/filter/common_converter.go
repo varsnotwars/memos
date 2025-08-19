@@ -207,7 +207,7 @@ func (c *CommonSQLConverter) handleInOperator(ctx *ConvertContext, callExpr *exp
 		return err
 	}
 
-	if !slices.Contains([]string{"tag", "visibility", "content_id", "memo_id"}, identifier) {
+	if !slices.Contains([]string{"tag", "visibility", "content_id", "memo_id", "memo_relation_id"}, identifier) {
 		return errors.Errorf("invalid identifier for %s", callExpr.Function)
 	}
 
