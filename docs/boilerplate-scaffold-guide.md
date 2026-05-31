@@ -83,9 +83,9 @@ sequenceDiagram
 5. Add backend tests near touched packages (`server/router/api/v1`, `store`, `internal`).
 
 ### Frontend feature path
-1. Add/extend typed client usage in `web/src/connect.ts` consumers.
+1. Add/extend typed client usage through feature hooks in `web/src/hooks` (and update `web/src/connect.ts` only when introducing new service clients).
 2. Add page/component modules under `web/src/pages` and `web/src/components`.
-3. Register route(s) in `web/src/router/index.tsx` and constants in `web/src/router/routes.ts`.
+3. Register route(s) in `web/src/router/index.tsx` (and update any route constants module kept in your scaffold).
 4. Add UI tests in existing Vitest test locations alongside changed components.
 
 ### Validation workflow
