@@ -28,13 +28,13 @@ flowchart TD
 
 | Path | Role in current repo | Keep for boilerplate? |
 | --- | --- | --- |
-| `/tmp/workspace/varsnotwars/memos/cmd/memos` | App entrypoint and runtime bootstrap | Keep |
-| `/tmp/workspace/varsnotwars/memos/server` | HTTP server composition, route registration, background runners | Keep |
-| `/tmp/workspace/varsnotwars/memos/store` | Storage abstraction + DB drivers + migrations | Keep |
-| `/tmp/workspace/varsnotwars/memos/proto` | API contracts and generated client/server types | Keep |
-| `/tmp/workspace/varsnotwars/memos/web/src` | React app shell, routing, API clients, feature UI | Keep (trim feature-specific pages/components) |
-| `/tmp/workspace/varsnotwars/memos/internal` | Shared runtime packages (profile, utils, markdown, etc.) | Keep selectively |
-| `/tmp/workspace/varsnotwars/memos/docs/plans` | Historical implementation plans | Remove from scaffold output |
+| `cmd/memos` | App entrypoint and runtime bootstrap | Keep |
+| `server` | HTTP server composition, route registration, background runners | Keep |
+| `store` | Storage abstraction + DB drivers + migrations | Keep |
+| `proto` | API contracts and generated client/server types | Keep |
+| `web/src` | React app shell, routing, API clients, feature UI | Keep (trim feature-specific pages/components) |
+| `internal` | Shared runtime packages (profile, utils, markdown, etc.) | Keep selectively |
+| `docs/plans` | Historical implementation plans | Remove from scaffold output |
 
 ## 3) Runtime architecture
 
@@ -76,20 +76,19 @@ sequenceDiagram
 ## 5) How to add new features on top of the scaffold
 
 ### Backend feature path
-1. Define or extend API contract in `/tmp/workspace/varsnotwars/memos/proto/api/v1/*.proto`.
-2. Implement server behavior in `/tmp/workspace/varsnotwars/memos/server/router/api/v1`.
-3. Add persistence methods/models under `/tmp/workspace/varsnotwars/memos/store`.
-4. Add DB migration updates in `/tmp/workspace/varsnotwars/memos/store/migration/*`.
+1. Define or extend API contract in `proto/api/v1/*.proto`.
+2. Implement server behavior in `server/router/api/v1`.
+3. Add persistence methods/models under `store`.
+4. Add DB migration updates in `store/migration/*`.
 5. Add backend tests near touched packages (`server/router/api/v1`, `store`, `internal`).
 
 ### Frontend feature path
-1. Add/extend typed client usage in `/tmp/workspace/varsnotwars/memos/web/src/connect.ts` consumers.
-2. Add page/component modules under `/tmp/workspace/varsnotwars/memos/web/src/pages` and `components`.
-3. Register route(s) in `/tmp/workspace/varsnotwars/memos/web/src/router/index.tsx` and constants in `routes.ts`.
+1. Add/extend typed client usage in `web/src/connect.ts` consumers.
+2. Add page/component modules under `web/src/pages` and `web/src/components`.
+3. Register route(s) in `web/src/router/index.tsx` and constants in `web/src/router/routes.ts`.
 4. Add UI tests in existing Vitest test locations alongside changed components.
 
 ### Validation workflow
 1. Backend: `go test ./...`
 2. Frontend: `cd web && pnpm lint && pnpm test && pnpm build`
 3. Ensure CI workflows remain green for backend, frontend, and proto checks.
-
