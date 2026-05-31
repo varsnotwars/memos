@@ -64,13 +64,14 @@ sequenceDiagram
    - Routing framework (`server/router/*`)
    - Store abstraction and DB plumbing (`store/*`)
    - Frontend shell (`web/src/App.tsx`, `web/src/router`, layout scaffolding)
-   - Build/test/tooling files (`go.mod`, `web/package.json`, CI workflows)
+   - Build/test/tooling files (`go.mod`, `web/package.json`, `.github/workflows/backend-tests.yml`, `.github/workflows/frontend-tests.yml`, `.github/workflows/proto-linter.yml`)
 2. Remove product-specific features in vertical slices:
    - Memos domain handlers/services
    - Memos UI pages/components
    - Domain-specific proto services/messages
 3. Keep one minimal reference feature end-to-end (API + store + page) as an example slice.
-4. Rename modules, env vars, branding, and route constants to neutral scaffold naming.
+4. Rename Go module/package naming, proto package/service naming, env vars, branding, and route constants to neutral scaffold naming.
+   - After proto contract changes, regenerate code for backend and frontend generated types.
 5. Reset migrations and seed data to a minimal baseline schema for the new project.
 
 ## 5) How to add new features on top of the scaffold
@@ -79,7 +80,7 @@ sequenceDiagram
 1. Define or extend API contract in `proto/api/v1/*.proto`.
 2. Implement server behavior in `server/router/api/v1`.
 3. Add persistence methods/models under `store`.
-4. Add DB migration updates in `store/migration/*`.
+4. Add DB migration updates for all supported drivers in `store/migration/{sqlite,mysql,postgres}` and refresh each driver's `LATEST.sql`.
 5. Add backend tests near touched packages (`server/router/api/v1`, `store`, `internal`).
 
 ### Frontend feature path
